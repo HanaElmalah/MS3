@@ -1,0 +1,25 @@
+//Scoring rule
+
+MATCH (j:Journey)
+
+WITH j,
+     5 -
+     CASE 
+        WHEN abs(j.arrival_delay_minutes)/20.0 > 5 THEN 5
+        ELSE round((abs(j.arrival_delay_minutes)/20.0) * 10) / 10.0
+     END AS delayScore,
+     5 -
+     CASE 
+        WHEN abs(j.number_of_legs)*1.5 > 5 THEN 5
+        ELSE round((abs(j.number_of_legs) * 1.5) * 10) / 10.0
+     END AS legsScore,
+     5 -
+     CASE 
+        WHEN abs(j.actual_flown_miles)/3000.0 > 5 THEN 5
+        ELSE round((abs(j.actual_flown_miles)/3000.0) * 10) / 10.0
+     END AS milesScore
+WITH j,
+     round((0.5  * j.food_satisfaction_score +
+     0.35 * delayScore + 0.1  * legsScore + 0.05 * milesScore)*10.0)/10.0 AS satisfaction_score
+WHERE satisfaction_score > 3
+RETURN count(j);
